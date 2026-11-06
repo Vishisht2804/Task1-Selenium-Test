@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Practice Form - AMBIGUOUS FIXTURE</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 24px; max-width: 900px; }
+  form { border: 1px solid #ccc; padding: 16px; margin: 16px 0; }
+  .cell { margin: 8px 0; }
+  .cap { display: block; font-weight: bold; margin-bottom: 4px; }
+  .opts label { margin-right: 12px; }
+</style>
+</head>
+<body>
+
+<h2>Two identical forms (ambiguity fixture)</h2>
+<p>The same complete form is rendered twice. Neither form has an id and the markup is
+identical, so no attribute distinguishes one form's fields from the other's. The resolver
+must refuse to guess and report the ambiguity instead.</p>
+
+<!-- FORM #1: complete (First Name, Gender, State), no distinguishing attributes. -->
+<form action="#" onsubmit="return false">
+  <div class="cell">
+    <label class="cap">First Name</label>
+    <input type="text">
+  </div>
+  <div class="cell">
+    <label class="cap">Gender</label>
+    <div class="opts">
+      <label><input type="radio" name="gender" value="Male"> Male</label>
+      <label><input type="radio" name="gender" value="Female"> Female</label>
+      <label><input type="radio" name="gender" value="Transgender"> Transgender</label>
+    </div>
+  </div>
+  <div class="cell">
+    <label class="cap">State</label>
+    <select>
+      <option value="">-- Select Country --</option>
+      <option>India</option>
+      <option>Japan</option>
+      <option>United States</option>
+    </select>
+  </div>
+</form>
+
+<!-- FORM #2: byte-for-byte the same markup as FORM #1. -->
+<form action="#" onsubmit="return false">
+  <div class="cell">
+    <label class="cap">First Name</label>
+    <input type="text">
+  </div>
+  <div class="cell">
+    <label class="cap">Gender</label>
+    <div class="opts">
+      <label><input type="radio" name="gender" value="Male"> Male</label>
+      <label><input type="radio" name="gender" value="Female"> Female</label>
+      <label><input type="radio" name="gender" value="Transgender"> Transgender</label>
+    </div>
+  </div>
+  <div class="cell">
+    <label class="cap">State</label>
+    <select>
+      <option value="">-- Select Country --</option>
+      <option>India</option>
+      <option>Japan</option>
+      <option>United States</option>
+    </select>
+  </div>
+</form>
+
+</body>
+</html>

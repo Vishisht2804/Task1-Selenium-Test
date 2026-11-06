@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Practice Form - MODIFIED FIXTURE</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 24px; max-width: 900px; }
+  .cell { margin: 12px 0; padding: 8px; border: 1px solid #ddd; }
+  .cap  { display: block; font-weight: bold; margin-bottom: 6px; }
+  .deep, .deeper, .inner, .opts { padding: 2px; }
+  input[type=text], select { margin: 2px 6px 2px 0; }
+</style>
+</head>
+<body>
+
+<!-- CHANGE: hidden duplicate "First Name" (must be ignored: not visible) -->
+<div style="display:none">
+  <label for="hid1">First Name</label>
+  <input id="hid1" type="text" name="hidden_fn">
+</div>
+
+<h2>Registration (modified fixture)</h2>
+
+<!-- CHANGE: a DECOY form placed BEFORE the real one. It also has "First Name" and "State",
+     but no "Gender", so it is not the primary form. -->
+<form id="billing" action="#" onsubmit="return false">
+  <h3>Billing contact (decoy)</h3>
+  <label for="b-fn">First Name</label> <input id="b-fn" type="text" name="b_fn">
+  <label for="b-st">State</label>
+  <select id="b-st" name="b_st"><option value="IN">India</option><option value="US">United States</option></select>
+</form>
+
+<!-- THE REAL FORM: random id, extra wrappers -->
+<section class="zz-shell"><div class="zz-wrap">
+<form id="reg-9f2c" class="x-form" action="#" onsubmit="return false">
+
+  <!-- CHANGE: Last Name now comes first; similar-looking text input -->
+  <div class="cell">
+    <label for="ln-5" class="cap">Last Name</label>
+    <input id="ln-5" type="text" name="family_x" placeholder="Surname">
+  </div>
+
+  <!-- CHANGE: State moved to the top of the three target fields.
+       Label is a <span> with no 'for'; select is nested in wrappers; option VALUES changed (IN, US...);
+       an unlabeled second <select> sits in the same container. -->
+  <div class="cell">
+    <span class="cap">State</span>
+    <div class="inner">
+      <select name="tz_zone"><option>UTC</option><option>IST</option></select>
+      <select name="region_q">
+        <option value="">-- choose --</option>
+        <option value="AF">Afganistan</option>
+        <option value="AU">Australia</option>
+        <option value="CA">Canada</option>
+        <option value="FR">France</option>
+        <option value="DE">Germany</option>
+        <option value="IN">India</option>
+        <option value="JP">Japan</option>
+        <option value="US">United States</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- CHANGE: Gender label is a <div>, options reordered (Transgender, Female, Male), radio names/values changed,
+       and the option text is carried three different ways:
+         Transgender -> label wrapping the input
+         Female      -> <label for=...> as a sibling
+         Male        -> plain adjacent <span> (radio itself wrapped in a span) -->
+  <div class="cell">
+    <div class="cap">Gender</div>
+    <div class="opts">
+      <label><input type="radio" name="g_a" value="3"> Transgender</label>
+      <input type="radio" name="g_a" id="rb-2" value="2"><label for="rb-2">Female</label>
+      <span class="w"><input type="radio" name="g_a" value="1"></span><span class="t">Male</span>
+    </div>
+  </div>
+
+  <!-- CHANGE: similar radio group elsewhere in the form, also offering "Male" (must not be used) -->
+  <div class="cell">
+    <div class="cap">Salutation</div>
+    <label><input type="radio" name="sal" value="Male"> Male</label>
+    <label><input type="radio" name="sal" value="Female"> Female</label>
+  </div>
+
+  <!-- CHANGE: First Name now after Last Name/State/Gender. Label has no 'for'; input is two wrappers deep;
+       an unlabeled "Nickname" text input sits in the same container BEFORE the real one. -->
+  <div class="cell">
+    <label class="cap">First Name</label>
+    <div class="deep"><div class="deeper">
+      <input type="text" name="nick" placeholder="Nickname (optional)">
+      <input type="text" id="q-1" name="given_x" placeholder="Given name" autocomplete="given-name">
+    </div></div>
+  </div>
+
+</form>
+</div></section>
+
+<!-- CHANGE: Shadow DOM demo, like the original page. Its LIGHT DOM holds copies with the ORIGINAL ids
+     (fname, state) - a naive By.Id("fname") would hit these instead of the real field.
+     The labels live inside the shadow root, so the resolver never sees them. -->
+<form id="demo-shadow" action="#" onsubmit="return false">
+  <h3>Shadow DOM demo (must be ignored)</h3>
+  <shadow-card></shadow-card>
+</form>
+
+<script>
+  customElements.define('shadow-card', class extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({ mode: 'open' }).innerHTML =
+        '<label>First Name</label> <slot name="a"></slot><br>' +
+        '<label>Gender</label> <slot name="b"></slot><br>' +
+        '<label>State</label> <slot name="c"></slot>';
+    }
+    connectedCallback() {
+      this.innerHTML =
+        '<input slot="a" id="fname" type="text" name="fname">' +
+        '<span slot="b"><input type="radio" name="gender" value="Male"> Male ' +
+        '<input type="radio" name="gender" value="Female"> Female</span>' +
+        '<select slot="c" id="state" name="State"><option value="India">India</option></select>';
+    }
+  });
+</script>
+
+</body>
+</html>
