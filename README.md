@@ -11,7 +11,7 @@ Fills three fields on https://app.cloudqa.io/home/AutomationPracticeForm and ver
 The code contains **no id, name, class, XPath or index locators**. Fields are found by their visible label
 text and DOM relationships (see "How the resolver works").
 
-> **Verification status.** Built and run on .NET SDK 10 (net8.0 target), Chrome 157 and Selenium Manager. All 5 tests pass against the live page and against `Fixtures/modified-form.html`, including the ambiguity test.
+> **Verification status.** Verified with .NET SDK 10 (targeting `net8.0`), Chrome 157 and Selenium Manager. The four field-automation tests pass against both the live page and `Fixtures/modified-form.html`. The fifth test passes against its dedicated ambiguity fixture.
 
 ## Project structure
 
