@@ -11,7 +11,7 @@ Fills three fields on https://app.cloudqa.io/home/AutomationPracticeForm and ver
 The code contains **no id, name, class, XPath or index locators**. Fields are found by their visible label
 text and DOM relationships (see "How the resolver works").
 
-> **Verification status.** Built and run on .NET SDK 10 (net8.0 target), Chrome 157 and Selenium Manager. All 4 tests pass against the live page and against Fixtures/modified-form.html. The ambiguity test (5th) also passes in both runs.
+> **Verification status.** Built and run on .NET SDK 10 (net8.0 target), Chrome 157 and Selenium Manager. All 5 tests pass against the live page and against `Fixtures/modified-form.html`, including the ambiguity test.
 
 ## Project structure
 
@@ -31,7 +31,10 @@ SeleniumAutomation/
     ResolutionDiagnostics.cs    exceptions + trace used in error messages
     TextUtil.cs                 whitespace / case normalisation
   Tests/AutomationPracticeTests.cs
-  Fixtures/modified-form.html   modified page used to demonstrate resilience
+  Tests/AmbiguityTests.cs           verifies ambiguous matches fail rather than guess
+  Fixtures/modified-form.html      modified page used to demonstrate resilience
+  Fixtures/ambiguous-form.html     two identical forms used by the ambiguity test
+  .gitignore                       excludes build output, IDE files and test artifacts
 ```
 
 ## Setup and run
@@ -157,12 +160,11 @@ compared; the form is never submitted.
 | Radio option text as wrapping label / `label[for]` / adjacent span | Yes | Fixture (one of each) |
 | Radio values / select option values changed | Yes | Fixture (`value="IN"`; text still matched) |
 | Shadow DOM copies with duplicate ids | Yes | Fixture; original page |
-| iframes containing a copy of the form | Yes | Original page only (iframes are not searched) |
+| iframes containing a copy of the form | No | Not searched; resolver only inspects the top-level document |
 | Radio text placed before the radio instead of after | Yes | Design only |
 | `aria-labelledby` / `fieldset+legend` structures | Yes | Design only |
 | Custom-styled radio with hidden `<input>` | Yes | Design only (label click) |
-| Two complete forms with identical labels | Fails loudly | Design only (`AmbiguousElementException`) |
-| Ambiguity demonstration: two identical complete forms, no distinguishing attributes | Fails loudly | Fixture `Fixtures/ambiguous-form.html` + `Tests/AmbiguityTests.cs` asserts `AmbiguousElementException` whose message names "First Name" and the candidates; executed, passing |
+| Two identical complete forms with no distinguishing attributes | Fails loudly | `Fixtures/ambiguous-form.html` + `Tests/AmbiguityTests.cs` assert `AmbiguousElementException`; executed, passing |
 | Label text with trailing `:` / `*` / extra spaces / different case | Yes | Design only |
 
 ## Known limitations (rules that would need updating)
