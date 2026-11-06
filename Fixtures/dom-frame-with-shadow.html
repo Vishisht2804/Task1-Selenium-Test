@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>dom fixture: frame containing shadow</title></head>
+<body><h2>Frame With Shadow</h2><x-in-frame></x-in-frame>
+<script>
+customElements.define('x-in-frame', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<label>In frame shadow</label><input type="text">'; }
+});
+</script></body></html>

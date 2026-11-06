@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>dom fixture: single shadow</title></head>
+<body>
+<h1>Single Shadow</h1>
+<form><x-single></x-single><label>Light label</label> <input type="text"></form>
+<script>
+customElements.define('x-single', class extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' }).innerHTML =
+      '<label>Shadow label</label><input type="text"><select><option>A</option></select>';
+  }
+});
+</script>
+</body></html>

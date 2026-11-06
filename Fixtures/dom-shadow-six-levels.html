@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>dom fixture: six nested shadow roots</title></head>
+<body>
+<h1>Six Levels</h1>
+<div id="mount"></div>
+<script>
+// Builds x-level-1 > #shadow > x-level-2 > #shadow > ... > x-level-6 > #shadow > label + input
+let parent = document.getElementById('mount');
+for (let i = 1; i <= 6; i++) {
+  const host = document.createElement('x-level-' + i);
+  if (i === 1) parent.appendChild(host);
+  else parent.shadowRoot.appendChild(host);
+  host.attachShadow({ mode: 'open' });
+  parent = host;
+}
+parent.shadowRoot.innerHTML = '<label>Deepest</label><input type="text">';
+</script>
+</body></html>

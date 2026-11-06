@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--
+  OFFLINE REPLICA of the CloudQA AutomationPracticeForm page, limited to the parts verified from the page SOURCE:
+  the light-DOM form, <shadow-form> (shadow root + slotted light-DOM sections), <s-button>, the 2..6 level
+  nestedshadow-* chains, and <nestedshadow-iframe> whose iframe loads the page itself (src is relative).
+  The custom-element definitions are copied from the page source (option list shortened, CDN <link> tags removed).
+  The two plain iframes (/Home/IFrame, /Home/InnerNestedIFrame) are NOT replicated: their contents were not available.
+-->
+<html><head><meta charset="utf-8"><title>dom fixture: CloudQA structure replica</title></head>
+<body>
+<div class="container">
+  <form id="automationtestform">
+    <h2>Form</h2>
+    <label for="fname">First Name</label> <input id="fname" type="text" name="First Name">
+    <label class="control-label">Gender</label>
+    <input id="male" type="radio" name="gender" value="Male"><span>Male</span>
+    <input id="female" type="radio" name="gender" value="Female"><span>Female</span>
+    <label for="state"> State </label>
+    <select id="state" name="State"><option> -- Select Country -- </option><option value="India">India</option></select>
+  </form>
+  <form id="shadowdomautomationtestform"><h1>Shadow DOM</h1><shadow-form></shadow-form><div><s-button></s-button></div></form>
+  <form id="nestedshadowdomautomationtestform"><h1>Nested Shadow DOM</h1><nestedshadow-form></nestedshadow-form><div><s-button></s-button></div></form>
+  <form id="nestedshadowdomautomationtestform3"><h1>Nested Shadow DOM with 3 Levels</h1><nestedshadow-form3></nestedshadow-form3><div><s-button></s-button></div></form>
+  <form id="nestedshadowdomautomationtestform4"><h1>Nested Shadow DOM with 4 Levels</h1><nestedshadow-form4></nestedshadow-form4><div><s-button></s-button></div></form>
+  <form id="nestedshadowdomautomationtestform5"><h1>Nested Shadow DOM with 5 Levels</h1><nestedshadow-form5></nestedshadow-form5><div><s-button></s-button></div></form>
+  <form id="nestedshadowdomautomationtestform6"><h1>Nested Shadow DOM with 6 Levels</h1><nestedshadow-form6></nestedshadow-form6><div><s-button></s-button></div></form>
+  <h1>IFrame inside Shadow DOM</h1>
+  <nestedshadow-iframe></nestedshadow-iframe>
+  <div><s-button></s-button></div>
+</div>
+<script>
+customElements.define('shadow-form', class extends HTMLElement {
+  constructor() {
+    super()
+    this.attachShadow({ mode: 'open' }).innerHTML = `
+      <div class="row">
+        <div><label for="fname" name="fname">First Name</label><slot name="fname"></slot></div>
+        <div><label for="lname" name="lname">Last Name</label><slot name="lname"></slot></div>
+        <div><label>Gender</label><div><slot name="gender"></slot></div></div>
+        <div><label name="State" for="state"> State </label><slot name="statedropdown"></slot></div>
+        <div><label>Hobbies</label><slot name="hobbies"></slot></div>
+        <div><label>About Yourself</label><slot name="about"></slot></div>
+        <div><label>Description</label><slot name="description"></slot></div>
+      </div>
+      <div class="row"><input type="checkbox" id="Agree" Value="Agree" name="Agree" required /> I agree to <a href="#">terms</a></div>`
+  }
+  connectedCallback() {
+    this.innerHTML = `<section slot="statedropdown">
+        <select id="state" name="State"><option> -- Select Country -- </option><option value="India">India</option></select>
+      </section>
+      <section slot="dropdownmenu"><ul><li><a href="//app.cloudqa.io">Applcation Login</a></li></ul></section>
+      <section slot="fname"><input id="fname" name="fname" type="text" placeholder="Name" /></section>
+      <section slot="lname"><input id="lname" name="lname" type="text" placeholder="Name" /></section>
+      <section slot="gender">
+        <input id="male" type="radio" name="gender" value="Male" /><span name="male" for="male">Male</span>
+        <input id="female" type="radio" name="gender" value="Female" /><span name="female" for="female">Female</span>
+        <input id="transgender" type="radio" name="gender" value="Transgender" /><span name="transgender" for="female">Transgender</span>
+      </section>
+      <section slot="hobbies">
+        <input type="checkbox" id="Dance" Value="Dance" name="Hobbies" /><span>Dance</span>
+        <input type="checkbox" id="Reading" Value="Reading" name="Hobbies" /><span>Reading</span>
+      </section>
+      <section slot="about"><textarea rows="3" placeholder="About Yourself" name="About"></textarea></section>
+      <section slot="description"><textarea rows="3" placeholder="" name="description"></textarea></section>`
+  }
+})
+customElements.define('s-button', class extends HTMLElement {
+  connectedCallback() {
+    this.attachShadow({ mode: 'open' }).innerHTML = `<button class="btn btn-primary">Submit</button>`
+    var submit = this.appendChild(document.createElement('button'))
+    this.onclick = () => submit.click()
+  }
+})
+customElements.define('nestedshadow-form', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = `<shadow-form></shadow-form>`; }
+})
+customElements.define('nestedshadow-form3', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = `<nestedshadow-form></nestedshadow-form>`; }
+})
+customElements.define('nestedshadow-form4', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = `<nestedshadow-form3></nestedshadow-form3>`; }
+})
+customElements.define('nestedshadow-form5', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = `<nestedshadow-form4></nestedshadow-form4>`; }
+})
+customElements.define('nestedshadow-form6', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = `<nestedshadow-form5></nestedshadow-form5>`; }
+})
+customElements.define('nestedshadow-iframe', class extends HTMLElement {
+  connectedCallback() {
+    // On the real page this src is "AutomationPracticeForm" (relative), i.e. the page itself.
+    this.attachShadow({ mode: 'open' }).innerHTML = `<iframe id="iframeId" src="dom-cloudqa-replica.html" style="width:100%;height:300px;"></iframe>`
+  }
+})
+</script>
+</body></html>

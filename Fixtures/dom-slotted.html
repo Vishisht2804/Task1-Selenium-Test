@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>dom fixture: slots</title></head>
+<body>
+<h1>Slotted</h1>
+<x-slotted>
+  <section slot="first"><input type="text"></section>
+  <section slot="second"><input type="radio" name="g" value="a"><span>A</span><input type="radio" name="g" value="b"><span>B</span></section>
+  <section><p>default slot content</p></section>
+  <section slot="orphan"><span>assigned to no slot</span></section>
+  <section slot="nested"><x-inner-host></x-inner-host></section>
+</x-slotted>
+<script>
+customElements.define('x-inner-host', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<input type="text">'; }
+});
+// Labels live in the shadow tree; the controls are light-DOM children assigned through slots.
+customElements.define('x-slotted', class extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' }).innerHTML =
+      '<label>First</label><slot name="first"></slot>' +
+      '<label>Second</label><slot name="second"></slot>' +
+      '<slot></slot><slot name="nested"></slot>' +
+      '<slot name="empty"><em>fallback</em></slot>';
+  }
+});
+</script>
+</body></html>

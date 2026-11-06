@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>dom fixture: recursive iframe</title></head>
+<body><h1>Recursive</h1><x-self></x-self>
+<script>
+// The iframe loads THIS page, so every embedded copy embeds another copy, without end.
+customElements.define('x-self', class extends HTMLElement {
+  connectedCallback() {
+    this.attachShadow({ mode: 'open' }).innerHTML = '<iframe src="dom-iframe-recursive.html"></iframe>';
+  }
+});
+</script></body></html>
