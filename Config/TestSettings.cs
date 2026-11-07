@@ -10,7 +10,7 @@ public sealed class TestSettings
 {
     public const string EnvPrefix = "SELAUTO_";
 
-    public string PageUrl { get; set; } = "https://app.cloudqa.io/home/AutomationPracticeForm";
+    public string PageUrl { get; set; } = "";
     public string FirstNameValue { get; set; } = "Alex";
     public string GenderValue { get; set; } = "Male";
     public string StateValue { get; set; } = "India";
@@ -29,14 +29,20 @@ public sealed class TestSettings
             .Build();
 
         var settings = configuration.Get<TestSettings>() ?? new TestSettings();
+        if (Uri.TryCreate(settings.PageUrl, UriKind.Relative, out _))
+            settings.PageUrl = new Uri(Path.Combine(AppContext.BaseDirectory, settings.PageUrl), UriKind.Absolute).AbsoluteUri;
         settings.Validate();
         return settings;
     }
 
     private void Validate()
     {
-        if (!Uri.TryCreate(PageUrl, UriKind.Absolute, out _))
+        if (!Uri.TryCreate(PageUrl, UriKind.Absolute, out var uri))
             throw new InvalidOperationException($"PageUrl '{PageUrl}' is not an absolute URL.");
+        if (uri.Scheme != Uri.UriSchemeFile &&
+            !(uri.Scheme == Uri.UriSchemeHttp && (uri.Host == "localhost" || uri.Host == "127.0.0.1")) &&
+            !(uri.Scheme == Uri.UriSchemeHttps && uri.Host.Equals("app.cloudqa.io", StringComparison.OrdinalIgnoreCase)))
+            throw new InvalidOperationException("PageUrl must use a local fixture URL or https://app.cloudqa.io.");
         if (string.IsNullOrWhiteSpace(FirstNameValue))
             throw new InvalidOperationException("FirstNameValue must not be empty.");
         if (string.IsNullOrWhiteSpace(GenderValue))

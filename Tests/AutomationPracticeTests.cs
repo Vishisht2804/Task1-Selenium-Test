@@ -7,40 +7,35 @@ namespace SeleniumAutomation.Tests;
 public sealed class AutomationPracticeTests : BaseTest
 {
     [Test]
-    public void FirstName_TextBox_AcceptsConfiguredValue()
+    [Category("Live")]
+    public void EveryCompleteLiveForm_CanBeFilled()
     {
-        var result = Page.EnterFirstName(Settings.FirstNameValue);
-        Assert.That(result.Passed, Is.True, result.ToString());
-    }
+        Open(Settings.PageUrl);
+        var candidates = DiscoverCompleteCandidates();
+        Assert.That(candidates, Is.Not.Empty, "The live page must expose at least one complete form.");
 
-    [Test]
-    public void Gender_RadioButton_SelectsConfiguredOption()
-    {
-        var result = Page.SelectGender(Settings.GenderValue);
-        Assert.That(result.Passed, Is.True, result.ToString());
-    }
-
-    [Test]
-    public void State_Dropdown_SelectsConfiguredOption()
-    {
-        var result = Page.SelectState(Settings.StateValue);
-        Assert.That(result.Passed, Is.True, result.ToString());
-    }
-
-    [Test]
-    public void AllThreeFields_CanBeFilledInOneSession()
-    {
-        var results = new[]
+        var failures = new List<string>();
+        foreach (var candidate in candidates)
         {
-            Page.EnterFirstName(Settings.FirstNameValue),
-            Page.SelectGender(Settings.GenderValue),
-            Page.SelectState(Settings.StateValue)
-        };
+            try
+            {
+                var page = CreatePage(candidate);
+                var results = new[]
+                {
+                    page.EnterFirstName(Settings.FirstNameValue),
+                    page.SelectGender(Settings.GenderValue),
+                    page.SelectState(Settings.StateValue)
+                };
+                failures.AddRange(results.Where(result => !result.Passed)
+                    .Select(result => $"{candidate.Description}: {result}"));
+            }
+            catch (Exception ex)
+            {
+                failures.Add($"{candidate.Description}: {ex.Message}");
+            }
+        }
 
-        Assert.Multiple(() =>
-        {
-            foreach (var r in results)
-                Assert.That(r.Passed, Is.True, r.ToString());
-        });
+        Assert.That(failures, Is.Empty,
+            "One or more complete forms failed:" + Environment.NewLine + string.Join(Environment.NewLine, failures));
     }
 }

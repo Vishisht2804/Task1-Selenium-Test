@@ -27,17 +27,22 @@ public sealed class AutomationPracticePage
     private readonly ElementResolver _resolver;
     private readonly Action<string> _log;
 
-    public AutomationPracticePage(IWebDriver driver, TestSettings settings, Action<string> log)
+    public AutomationPracticePage(IWebDriver driver, TestSettings settings, Action<string> log, FormCandidate candidate)
     {
         _driver = driver;
         _settings = settings;
         _log = log;
         _wait = new WaitHelper(driver, TimeSpan.FromSeconds(settings.TimeoutSeconds), log);
-        _resolver = new ElementResolver(driver, _wait, log);
+        _resolver = new ElementResolver(driver, _wait, candidate, log);
     }
 
     public void Open()
     {
+        if (!Uri.TryCreate(_settings.PageUrl, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeFile &&
+             !(uri.Scheme == Uri.UriSchemeHttp && (uri.Host == "localhost" || uri.Host == "127.0.0.1")) &&
+             !(uri.Scheme == Uri.UriSchemeHttps && uri.Host.Equals("app.cloudqa.io", StringComparison.OrdinalIgnoreCase))))
+            throw new InvalidOperationException("PageUrl must use a local fixture URL or https://app.cloudqa.io.");
         _log($"Opening {_settings.PageUrl}");
         _driver.Navigate().GoToUrl(_settings.PageUrl);
         _wait.UntilTrue(
@@ -53,15 +58,17 @@ public sealed class AutomationPracticePage
 
         _wait.Retry(() =>
         {
-            var input = _resolver.ResolveTextInput(spec);
-            _wait.WaitInteractable(input, "First Name input");
-            input.Clear();
-            input.SendKeys(value);
-            return true;
+            return _resolver.WithTextInput(input =>
+            {
+                _wait.WaitInteractable(input, "First Name input");
+                input.Clear();
+                input.SendKeys(value);
+                return true;
+            });
         }, "enter First Name");
 
         var actual = _wait.Retry(
-            () => _resolver.ResolveTextInput(spec).GetDomProperty("value") ?? "",
+            () => _resolver.WithTextInput(input => input.GetDomProperty("value") ?? ""),
             "read back First Name");
 
         return Report(new FieldResult(spec.Name, value, actual, "value read back from the resolved text input"));
@@ -75,16 +82,20 @@ public sealed class AutomationPracticePage
 
         var matchedBy = _wait.Retry(() =>
         {
-            var option = _resolver.ResolveRadioOption(spec, value);
-            if (!option.Radio.Selected) ClickRadio(option.Radio);
-            return option.MatchedBy;
+            return _resolver.WithRadioOption(value, option =>
+            {
+                if (!option.Radio.Selected) ClickRadio(option.Radio);
+                return option.MatchedBy;
+            });
         }, "select Gender");
 
         var (selected, othersSelected) = _wait.Retry(() =>
         {
-            var option = _resolver.ResolveRadioOption(spec, value);
-            var others = option.Group.Count(r => !r.Equals(option.Radio) && r.Selected);
-            return (option.Radio.Selected, others);
+            return _resolver.WithRadioOption(value, option =>
+            {
+                var others = option.Group.Count(r => !r.Equals(option.Radio) && r.Selected);
+                return (option.Radio.Selected, others);
+            });
         }, "verify Gender");
 
         var actual = selected && othersSelected == 0
@@ -118,21 +129,24 @@ public sealed class AutomationPracticePage
 
         var chosen = _wait.Retry(() =>
         {
-            var element = _resolver.ResolveSelect(spec);
-            _wait.WaitInteractable(element, "State dropdown");
-            var select = new SelectElement(element);
-            var (text, optionValue, byText) = FindOption(select, value);
+            return _resolver.WithSelect(element =>
+            {
+                _wait.WaitInteractable(element, "State dropdown");
+                var select = new SelectElement(element);
+                var (text, optionValue, byText) = FindOption(select, value);
 
-            if (byText) select.SelectByText(text);
-            else select.SelectByValue(optionValue);
-            return (text, optionValue, byText);
+                if (byText) select.SelectByText(text);
+                else select.SelectByValue(optionValue);
+                return (text, optionValue, byText);
+            });
         }, "select State");
 
         var actual = _wait.Retry(() =>
-        {
-            var selected = new SelectElement(_resolver.ResolveSelect(spec)).SelectedOption;
-            return (Text: TextUtil.NormalizeSpaces(selected.Text), Value: selected.GetDomProperty("value") ?? "");
-        }, "verify State");
+            _resolver.WithSelect(element =>
+            {
+                var selected = new SelectElement(element).SelectedOption;
+                return (Text: TextUtil.NormalizeSpaces(selected.Text), Value: selected.GetDomProperty("value") ?? "");
+            }), "verify State");
 
         var isRequested = actual.Text == chosen.text && actual.Value == chosen.optionValue;
         var shown = isRequested ? value : $"{actual.Text} (value='{actual.Value}')";

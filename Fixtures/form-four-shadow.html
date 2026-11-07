@@ -1,0 +1,7 @@
+<!doctype html><html><body><x-one></x-one><script>
+const markup = `<form><h1>Four Shadow Form</h1><label for="fn">First Name</label><input id="fn" type="text"><fieldset><legend>Gender</legend><label><input type="radio" name="g" value="Male">Male</label><label><input type="radio" name="g" value="Female">Female</label></fieldset><label for="st">State</label><select id="st"><option>India</option><option>Japan</option></select></form>`;
+customElements.define('x-four', class extends HTMLElement { connectedCallback(){this.attachShadow({mode:'open'}).innerHTML=markup;}});
+customElements.define('x-three', class extends HTMLElement { connectedCallback(){this.attachShadow({mode:'open'}).innerHTML='<x-four></x-four>';}});
+customElements.define('x-two', class extends HTMLElement { connectedCallback(){this.attachShadow({mode:'open'}).innerHTML='<x-three></x-three>';}});
+customElements.define('x-one', class extends HTMLElement { connectedCallback(){this.attachShadow({mode:'open'}).innerHTML='<x-two></x-two>';}});
+</script></body></html>

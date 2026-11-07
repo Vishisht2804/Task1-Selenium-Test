@@ -4,6 +4,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using SeleniumAutomation.Config;
 using SeleniumAutomation.Pages;
+using SeleniumAutomation.Utilities;
 
 namespace SeleniumAutomation.Base;
 
@@ -12,7 +13,6 @@ public abstract class BaseTest
 {
     protected TestSettings Settings { get; private set; } = null!;
     protected IWebDriver Driver { get; private set; } = null!;
-    protected AutomationPracticePage Page { get; private set; } = null!;
 
     protected static void Log(string message) => TestContext.Progress.WriteLine(message);
 
@@ -36,9 +36,24 @@ public abstract class BaseTest
         Driver = new ChromeDriver(options);
         Driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(Settings.TimeoutSeconds * 3);
 
-        Page = new AutomationPracticePage(Driver, Settings, Log);
-        Page.Open();
     }
+
+    protected void Open(string url)
+    {
+        Driver.Navigate().GoToUrl(url);
+        new WaitHelper(Driver, TimeSpan.FromSeconds(Settings.TimeoutSeconds), Log)
+            .UntilTrue(
+                d => (string)((IJavaScriptExecutor)d).ExecuteScript("return document.readyState") != "loading",
+                "document to finish loading");
+    }
+
+    protected AutomationPracticePage CreatePage(FormCandidate candidate) =>
+        new(Driver, Settings, Log, candidate);
+
+    protected IReadOnlyList<FormCandidate> DiscoverCompleteCandidates() =>
+        new FormCandidateDiscovery(Driver, log: Log).Discover().Candidates
+            .Where(candidate => candidate.IsComplete)
+            .ToList();
 
     [TearDown]
     public void StopBrowser()

@@ -5,9 +5,7 @@ using SeleniumAutomation.Utilities;
 namespace SeleniumAutomation.Tests;
 
 /// <summary>
-/// Demonstrates the resolver's refusal to guess. The fixture contains two complete, identical,
-/// visible forms, so "First Name" resolves to two equally plausible inputs.
-/// This test ignores SELAUTO_PAGEURL: it points the existing driver at its own fixture.
+/// Demonstrates that discovery returns both complete forms and callers exercise each candidate explicitly.
 /// </summary>
 [TestFixture]
 public sealed class AmbiguityTests : BaseTest
@@ -17,22 +15,20 @@ public sealed class AmbiguityTests : BaseTest
     public void OpenAmbiguousFixture()
     {
         Settings.PageUrl = AmbiguousFixtureUrl();
-        Page.Open();
+        Open(Settings.PageUrl);
     }
 
     [Test]
-    public void EnterFirstName_TwoIdenticalForms_ThrowsAmbiguousElementException()
+    public void TwoIdenticalForms_AreDiscoveredAndCanBeExercisedIndependently()
     {
-        var ex = Assert.Throws<AmbiguousElementException>(
-            () => Page.EnterFirstName(Settings.FirstNameValue));
+        var candidates = DiscoverCompleteCandidates();
+        Assert.That(candidates, Has.Count.EqualTo(2));
 
-        Log(ex!.Message);
-
-        Assert.Multiple(() =>
+        foreach (var candidate in candidates)
         {
-            Assert.That(ex.Message, Does.Contain("First Name"), "The message should name the ambiguous field.");
-            Assert.That(ex.Message, Does.Contain("candidates"), "The message should list the remaining candidates.");
-        });
+            var result = CreatePage(candidate).EnterFirstName(Settings.FirstNameValue);
+            Assert.That(result.Passed, Is.True, $"{candidate.Description}: {result}");
+        }
     }
 
     /// <summary>
