@@ -28,6 +28,14 @@ framework.
 timeout, headless mode, and Chrome arguments can be overridden with `SELAUTO_` environment variables. Local
 `file://`, localhost, `127.0.0.1`, and the CloudQA host are accepted.
 
+Set `Headless` to `false` and `KeepBrowserOpen` to `true` to watch the browser and leave it open after a test:
+
+```powershell
+dotnet test --filter "FullyQualifiedName~EveryCompleteLiveForm_CanBeFilled"
+```
+
+Set `KeepBrowserOpen` back to `false` for normal automated cleanup.
+
 ```powershell
 dotnet restore
 dotnet test --logger "console;verbosity=detailed"

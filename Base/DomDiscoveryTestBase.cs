@@ -35,6 +35,12 @@ public abstract class DomDiscoveryTestBase
     [TearDown]
     public void StopBrowser()
     {
+        if (Settings.KeepBrowserOpen)
+        {
+            Log("KeepBrowserOpen is enabled; leaving the browser open.");
+            return;
+        }
+
         try { Driver?.Quit(); }
         catch (Exception ex) { Log($"Driver.Quit failed: {ex.Message}"); }
         Driver?.Dispose();

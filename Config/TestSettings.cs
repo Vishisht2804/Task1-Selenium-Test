@@ -16,6 +16,7 @@ public sealed class TestSettings
     public string StateValue { get; set; } = "India";
     public int TimeoutSeconds { get; set; } = 20;
     public bool Headless { get; set; } = true;
+    public bool KeepBrowserOpen { get; set; }
 
     /// <summary>Optional extra Chrome arguments, space separated (e.g. "--no-sandbox" inside Docker).</summary>
     public string ChromeExtraArgs { get; set; } = "";
@@ -55,5 +56,5 @@ public sealed class TestSettings
 
     public override string ToString() =>
         $"PageUrl={PageUrl}, FirstName='{FirstNameValue}', Gender='{GenderValue}', State='{StateValue}', " +
-        $"Timeout={TimeoutSeconds}s, Headless={Headless}";
+        $"Timeout={TimeoutSeconds}s, Headless={Headless}, KeepBrowserOpen={KeepBrowserOpen}";
 }

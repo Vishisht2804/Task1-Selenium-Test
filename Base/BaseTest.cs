@@ -8,7 +8,7 @@ using SeleniumAutomation.Utilities;
 
 namespace SeleniumAutomation.Base;
 
-/// <summary>Owns the browser lifecycle. The browser is always closed, even when the test fails.</summary>
+/// <summary>Owns the browser lifecycle.</summary>
 public abstract class BaseTest
 {
     protected TestSettings Settings { get; private set; } = null!;
@@ -74,9 +74,16 @@ public abstract class BaseTest
         }
         finally
         {
-            try { Driver?.Quit(); }
-            catch (Exception ex) { Log($"Driver.Quit failed: {ex.Message}"); }
-            Driver?.Dispose();
+            if (Settings.KeepBrowserOpen)
+            {
+                Log("KeepBrowserOpen is enabled; leaving the browser open.");
+            }
+            else
+            {
+                try { Driver?.Quit(); }
+                catch (Exception ex) { Log($"Driver.Quit failed: {ex.Message}"); }
+                Driver?.Dispose();
+            }
         }
     }
 }
